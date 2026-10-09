@@ -9,8 +9,8 @@
 ---
 
 <p align="center">
-  <img height="165" src="https://github-readme-stats.vercel.app/api?username=shim9610&amp;show_icons=true&amp;hide_rank=true&amp;title_color=6667ab&amp;text_color=24292f&amp;icon_color=6667ab&amp;bg_color=30,e8e0f2,edbedc&amp;hide_border=true" alt="shim9610's GitHub activity statistics" />
-  <img height="165" src="https://github-readme-stats.vercel.app/api/top-langs/?username=shim9610&amp;layout=compact&amp;hide=AGS%20Script&amp;title_color=6667ab&amp;text_color=24292f&amp;bg_color=30,e8e0f2,edbedc&amp;hide_border=true" alt="Most used languages across public repositories" />
+  <img height="165" src="profile/stats.svg" alt="shim9610's GitHub activity statistics" />
+  <img height="165" src="profile/top-langs.svg" alt="Most used languages across public and accessible private repositories" />
 </p>
 
 ## Languages & Tools

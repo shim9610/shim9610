@@ -1,0 +1,91 @@
+name: Update README cards
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/stats.yml
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: readme-cards
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check private repository credential
+        id: access
+        env:
+          HAS_STATS_TOKEN: ${{ secrets.STATS_TOKEN != '' }}
+        run: |
+          if [ "$HAS_STATS_TOKEN" = "true" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Add the STATS_TOKEN repository secret to enable automatic private-repository stats. Existing cards are preserved."
+            echo "Automatic refresh skipped: STATS_TOKEN is missing. Add it in Settings > Secrets and variables > Actions, then run this workflow manually. Existing cards have not been replaced." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Check out profile
+        if: steps.access.outputs.ready == 'true'
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Verify private repository access
+        if: steps.access.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.STATS_TOKEN }}
+          PROFILE_OWNER: ${{ github.repository_owner }}
+        run: |
+          PRIVATE_REPO_COUNT=$(gh api graphql -f query='query($login: String!) { user(login: $login) { repositories(first: 1, privacy: PRIVATE, ownerAffiliations: OWNER, isFork: false) { totalCount } } }' -f login="$PROFILE_OWNER" --jq '.data.user.repositories.totalCount')
+          if [ "$PRIVATE_REPO_COUNT" -lt 1 ]; then
+            echo "::error::STATS_TOKEN cannot see any owned private repositories. Check its repository access and organization SSO authorization."
+            exit 1
+          fi
+          echo "Private repository access verified; $PRIVATE_REPO_COUNT owned private repositories are visible." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Generate stats card
+        if: steps.access.outputs.ready == 'true'
+        uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21 # v2
+        with:
+          card: stats
+          options: username=${{ github.repository_owner }}&show_icons=true&hide_rank=true&title_color=6667ab&text_color=24292f&icon_color=6667ab&bg_color=30,e8e0f2,edbedc&hide_border=true&disable_animations=true
+          path: profile/stats.svg
+          token: ${{ secrets.STATS_TOKEN }}
+          core_version: "2.2.0"
+          fail_on_error: "true"
+
+      - name: Generate language card
+        if: steps.access.outputs.ready == 'true'
+        uses: stats-organization/github-readme-stats-action@2c498845f71017821efaad14293ebc736156ef21 # v2
+        with:
+          card: top-langs
+          options: username=${{ github.repository_owner }}&layout=compact&langs_count=8&hide=AGS%20Script&title_color=6667ab&text_color=24292f&bg_color=30,e8e0f2,edbedc&hide_border=true&disable_animations=true
+          path: profile/top-langs.svg
+          token: ${{ secrets.STATS_TOKEN }}
+          core_version: "2.2.0"
+          fail_on_error: "true"
+
+      - name: Commit updated cards
+        if: steps.access.outputs.ready == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add profile/stats.svg profile/top-langs.svg
+          if git diff --cached --quiet; then
+            echo "Cards are unchanged." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit -m "Update README cards"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          echo "Updated aggregate cards using STATS_TOKEN." >> "$GITHUB_STEP_SUMMARY"
