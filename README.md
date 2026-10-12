@@ -3,7 +3,7 @@
 <p align="center">Rust · Python · Scientific computing</p>
 
 <p align="center">
-  <img src="https://komarev.com/ghpvc/?username=shim9610&amp;color=6667ab&amp;style=flat-square" alt="Profile views" />
+  <img src="https://hits.sh/github.com/shim9610.svg?style=flat-square&amp;label=Profile%20views&amp;color=6667ab" alt="Profile views" />
 </p>
 
 ---
