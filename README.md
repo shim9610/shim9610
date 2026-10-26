@@ -1,10 +1,6 @@
 <h1 align="center">shim9610</h1>
 
-<p align="center">
-  Rust · Python<br />
-  Scientific data acquisition &amp; logging · Data pipelines<br />
-  Scientific computing · Data visualization · GUI development
-</p>
+<p align="center">Building scientific tools, from data to interface.</p>
 
 <p align="center">
   <img src="https://hits.sh/github.com/shim9610.svg?style=flat-square&amp;label=Profile%20views&amp;color=6667ab" alt="Profile views" />
